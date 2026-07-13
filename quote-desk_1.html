@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quote Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C2B39;
+    --ink-soft:#3C4A57;
+    --paper:#FBF9F3;
+    --shell:#EEEBE2;
+    --panel:#FFFFFF;
+    --slate:#5B7280;
+    --line:#DCD6C6;
+    --line-soft:#EAE6D9;
+    --brass:#A6813C;
+    --brass-dark:#8A6A2C;
+    --brass-tint:#F1E7CC;
+    --brick:#8C3B2E;
+    --brick-tint:#F5E4E0;
+    --ok:#3C6E52;
+    --radius:3px;
+    --serif:'Source Serif 4', serif;
+    --sans:'Inter', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--sans);
+    background:var(--shell);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+
+  /* ---------- App shell ---------- */
+  .app-shell{
+    display:grid;
+    grid-template-columns:300px 1fr;
+    min-height:100vh;
+  }
+  .sidebar{
+    background:var(--ink);
+    color:#EDEAE1;
+    padding:22px 20px 40px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--brass);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-weight:700;font-size:18px;color:var(--ink);
+    flex:none;
+  }
+  .brand h1{font-family:var(--serif);font-size:17px;margin:0;letter-spacing:.2px;}
+  .brand p{margin:2px 0 0;font-size:11px;color:#B9C0BE;letter-spacing:.2px;}
+
+  .side-section{
+    border-top:1px solid rgba(255,255,255,.12);
+    padding-top:16px;
+  }
+  .side-section h2{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;
+    color:var(--brass);margin:0 0 12px;font-weight:600;
+  }
+  .field{margin-bottom:9px;}
+  .field label{
+    display:block;font-size:10.5px;color:#B9C0BE;margin-bottom:3px;letter-spacing:.2px;
+  }
+  .field input,.field select,.field textarea{
+    width:100%;padding:7px 9px;border-radius:var(--radius);
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.06);color:#F3F1EA;font-size:12.5px;
+  }
+  .field input::placeholder,.field textarea::placeholder{color:#7C8785;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .side-btn{
+    width:100%;padding:8px 10px;margin-top:6px;
+    background:transparent;border:1px solid var(--brass);color:var(--brass-tint);
+    border-radius:var(--radius);font-size:12px;font-weight:600;letter-spacing:.2px;
+    transition:background .15s;
+  }
+  .side-btn:hover{background:rgba(166,129,60,.18);}
+  .side-btn.solid{background:var(--brass);color:var(--ink);border-color:var(--brass);}
+  .side-btn.solid:hover{background:var(--brass-dark);}
+  .catalog-status{
+    font-size:11.5px;color:#CBD1C6;background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);border-radius:var(--radius);
+    padding:8px 10px;line-height:1.5;
+  }
+  .catalog-status strong{color:#F3F1EA;}
+  .link-btn{background:none;border:none;color:var(--brass-tint);font-size:11px;
+    text-decoration:underline;padding:0;letter-spacing:.2px;}
+
+  /* ---------- Main ---------- */
+  .main{padding:26px 34px 60px;max-width:1180px;}
+  .tabs{display:flex;gap:6px;margin-bottom:22px;border-bottom:1px solid var(--line);}
+  .tab-btn{
+    background:none;border:none;padding:10px 4px;margin-right:22px;
+    font-size:13.5px;font-weight:600;color:var(--slate);
+    border-bottom:2px solid transparent;letter-spacing:.2px;
+  }
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--brass);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .grid-2{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start;}
+  .panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:6px;
+    padding:18px 20px;
+  }
+  .panel h3{
+    font-family:var(--serif);font-size:15px;margin:0 0 4px;color:var(--ink);
+  }
+  .panel .sub{font-size:11.5px;color:var(--slate);margin:0 0 14px;}
+
+  .search-box{
+    display:flex;gap:8px;margin-bottom:12px;
+  }
+  .search-box input{
+    flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius);
+    font-size:13px;
+  }
+  .catalog-list{max-height:520px;overflow-y:auto;border-top:1px solid var(--line-soft);}
+  .catalog-row{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:9px 4px;border-bottom:1px solid var(--line-soft);cursor:pointer;
+  }
+  .catalog-row:hover{background:var(--brass-tint);}
+  .catalog-row .code{font-family:var(--mono);font-size:11.5px;color:var(--brass-dark);font-weight:600;min-width:64px;}
+  .catalog-row .desc{font-size:12.5px;color:var(--ink-soft);flex:1;}
+  .catalog-row .price{font-family:var(--mono);font-size:12px;color:var(--slate);}
+  .catalog-row .vat-badge{font-style:normal;font-size:10px;color:var(--brass-dark);background:var(--brass-tint);border:1px solid var(--brass);border-radius:8px;padding:1px 5px;margin-left:2px;}
+  .catalog-row .add{
+    width:22px;height:22px;border-radius:50%;border:1px solid var(--brass);
+    background:none;color:var(--brass-dark);font-size:14px;line-height:1;
+    display:flex;align-items:center;justify-content:center;flex:none;
+  }
+  .empty-note{
+    padding:30px 10px;text-align:center;color:var(--slate);font-size:12.5px;line-height:1.6;
+  }
+
+  .field-block{margin-bottom:18px;}
+  .field-block h4{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:var(--brass-dark);
+    margin:0 0 10px;font-weight:700;
+  }
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .form-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+  .form-grid label{display:block;font-size:11px;color:var(--slate);margin-bottom:3px;}
+  .form-grid input,.form-grid select,.form-grid textarea{
+    width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:var(--radius);
+    font-size:12.5px;color:var(--ink);
+  }
+  .form-grid textarea{resize:vertical;min-height:52px;}
+
+  table.items{width:100%;border-collapse:collapse;margin-top:6px;}
+  table.items th{
+    text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--slate);border-bottom:1px solid var(--line);padding:6px 6px;font-weight:600;
+  }
+  table.items td{
+    padding:6px 6px;border-bottom:1px solid var(--line-soft);font-size:12.5px;vertical-align:top;
+  }
+  table.items td input{
+    width:100%;border:1px solid var(--line);border-radius:var(--radius);
+    padding:5px 7px;font-size:12.5px;font-family:var(--mono);
+  }
+  table.items td.desc-cell input{font-family:var(--sans);}
+  table.items td.num{text-align:right;font-family:var(--mono);}
+  table.items .rm{
+    background:none;border:none;color:var(--brick);font-size:15px;line-height:1;
+    padding:2px 6px;
+  }
+  .totals-box{margin-top:14px;margin-left:auto;width:280px;}
+  .totals-box .row{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;}
+  .totals-box .row.grand{
+    border-top:2px solid var(--brick);margin-top:6px;padding-top:8px;
+    font-family:var(--serif);font-weight:700;font-size:16px;color:var(--brick);
+  }
+  .totals-box .row span:last-child{font-family:var(--mono);}
+
+  .btn-row{display:flex;gap:10px;margin-top:16px;}
+  .btn{
+    padding:9px 16px;border-radius:var(--radius);font-size:12.5px;font-weight:600;
+    border:1px solid var(--ink);background:var(--ink);color:#F3F1EA;letter-spacing:.2px;
+  }
+  .btn.ghost{background:none;color:var(--ink);}
+  .btn.brass{background:var(--brass);border-color:var(--brass);color:var(--ink);}
+
+  .mapping-table{width:100%;border-collapse:collapse;margin:10px 0;}
+  .mapping-table th,.mapping-table td{padding:6px;font-size:12px;border-bottom:1px solid var(--line-soft);text-align:left;}
+  .mapping-table select{width:100%;padding:5px;border:1px solid var(--line);border-radius:var(--radius);font-size:12px;}
+
+  /* ---------- Preview / Print doc ---------- */
+  .preview-wrap{display:none;justify-content:center;padding:10px 0 60px;}
+  .show-preview .preview-wrap{display:flex;}
+  .show-preview .build-panels{display:none;}
+
+  .print-doc{
+    display:none;
+    width:210mm;min-height:297mm;
+    background:var(--paper);
+    padding:16mm 15mm 18mm;
+    box-shadow:0 18px 50px rgba(28,43,57,.22);
+    position:relative;
+  }
+  .show-preview .print-doc{display:block;}
+
+  .doc-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--ink);padding-bottom:14px;}
+  .doc-seller h2{font-family:var(--serif);font-size:19px;margin:0 0 4px;color:var(--ink);}
+  .doc-seller .legal-lines{font-size:10.5px;color:var(--slate);line-height:1.6;max-width:260px;}
+  .doc-stamp{
+    text-align:right;
+  }
+  .doc-stamp .badge{
+    display:inline-block;border:2px solid var(--brass);color:var(--brass-dark);
+    border-radius:50%;width:88px;height:88px;display:flex;align-items:center;justify-content:center;
+    text-align:center;font-family:var(--serif);font-size:10.5px;font-weight:700;line-height:1.25;
+    transform:rotate(-6deg);letter-spacing:.4px;
+  }
+  .doc-title{font-family:var(--serif);font-size:26px;margin:16px 0 2px;color:var(--ink);}
+  .doc-meta-row{display:flex;gap:22px;flex-wrap:wrap;font-size:11px;color:var(--slate);margin-bottom:16px;}
+  .doc-meta-row div span{display:block;color:var(--ink);font-family:var(--mono);font-size:12px;margin-top:1px;}
+
+  .parties{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+  .party h5{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--brass-dark);margin:0 0 6px;}
+  .party .name{font-weight:600;font-size:13px;margin-bottom:2px;}
+  .party .lines{font-size:11.5px;color:var(--ink-soft);line-height:1.55;}
+
+  table.doc-items{width:100%;border-collapse:collapse;margin-bottom:4px;}
+  table.doc-items thead th{
+    text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;
+    color:#fff;background:var(--ink);padding:8px 8px;font-weight:600;
+  }
+  table.doc-items thead th.num{text-align:right;}
+  table.doc-items tbody td{
+    padding:7px 8px;border-bottom:1px solid var(--line);font-size:11.5px;
+  }
+  table.doc-items tbody td.num{text-align:right;font-family:var(--mono);}
+  table.doc-items tbody tr:nth-child(even){background:#F5F2E9;}
+  table.doc-items tbody td.code{font-family:var(--mono);color:var(--brass-dark);font-weight:600;}
+
+  .doc-totals{margin-left:auto;width:260px;margin-top:8px;}
+  .doc-totals .row{display:flex;justify-content:space-between;font-size:11.5px;padding:4px 0;color:var(--ink-soft);}
+  .doc-totals .row.grand{
+    border-top:2px double var(--brick);margin-top:4px;padding-top:8px;
+    font-family:var(--serif);font-weight:700;font-size:16px;color:var(--brick);
+  }
+
+  .doc-terms{margin-top:26px;font-size:10.5px;color:var(--slate);line-height:1.6;border-top:1px solid var(--line);padding-top:12px;}
+  .doc-terms h5{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--brass-dark);margin:0 0 5px;}
+
+  .doc-sign{display:flex;justify-content:space-between;margin-top:44px;}
+  .doc-sign .sign-block{width:44%;border-top:1px solid var(--ink);padding-top:6px;font-size:10.5px;color:var(--slate);}
+
+  .doc-footer{
+    position:absolute;bottom:10mm;left:15mm;right:15mm;
+    font-size:9px;color:var(--slate);text-align:center;border-top:1px solid var(--line-soft);
+    padding-top:8px;letter-spacing:.2px;
+  }
+
+  .preview-toolbar{
+    display:none;
+  }
+  .show-preview .preview-toolbar{display:flex;}
+  .preview-toolbar{justify-content:center;gap:10px;margin-bottom:14px;}
+
+  /* ---------- Archive ---------- */
+  .archive-date-filter{
+    display:flex;align-items:flex-end;gap:14px;margin-bottom:12px;flex-wrap:wrap;
+  }
+  .archive-date-filter .field{margin-bottom:0;}
+  .archive-date-filter .field label{
+    display:block;font-size:10.5px;color:var(--slate);margin-bottom:3px;letter-spacing:.2px;
+  }
+  .archive-date-filter .field input{
+    padding:7px 9px;border:1px solid var(--line);border-radius:var(--radius);font-size:12.5px;
+  }
+  .archive-date-filter .btn{padding:7px 12px;font-size:11.5px;}
+  .archive-list{max-height:560px;overflow-y:auto;border-top:1px solid var(--line-soft);margin-top:4px;}
+  .archive-row{
+    display:grid;grid-template-columns:70px 1fr 1fr 100px 90px 30px;gap:10px;align-items:center;
+    padding:10px 4px;border-bottom:1px solid var(--line-soft);cursor:pointer;
+  }
+  .archive-row:hover{background:var(--brass-tint);}
+  .archive-row .a-type{
+    font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;color:var(--brass-dark);
+    background:var(--brass-tint);border:1px solid var(--brass);border-radius:10px;padding:2px 7px;text-align:center;
+  }
+  .archive-row .a-number{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);}
+  .archive-row .a-client{font-size:12.5px;color:var(--ink);}
+  .archive-row .a-client .a-vat{display:block;font-size:10.5px;color:var(--slate);font-family:var(--mono);}
+  .archive-row .a-date{font-size:11.5px;color:var(--slate);font-family:var(--mono);}
+  .archive-row .a-total{font-size:12px;font-family:var(--mono);text-align:right;color:var(--ink);}
+  .archive-row .a-del{background:none;border:none;color:var(--brick);font-size:14px;padding:2px;}
+  .archive-detail-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .archive-detail-panel table{width:100%;border-collapse:collapse;}
+  .archive-detail-panel th{
+    text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--slate);
+    border-bottom:1px solid var(--line);padding:6px;font-weight:600;
+  }
+  .archive-detail-panel td{padding:6px;border-bottom:1px solid var(--line-soft);font-size:12.5px;}
+  .archive-detail-panel td.num{text-align:right;font-family:var(--mono);}
+  .archive-meta{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:16px;font-size:12px;color:var(--ink-soft);}
+  .archive-meta div span{display:block;color:var(--slate);font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;}
+  .archive-totals{margin-left:auto;width:240px;margin-top:10px;}
+  .archive-totals .row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--ink-soft);}
+  .archive-totals .row.grand{border-top:1px solid var(--brick);margin-top:4px;padding-top:6px;font-weight:700;color:var(--brick);}
+
+  ::-webkit-scrollbar{width:9px;}
+  ::-webkit-scrollbar-thumb{background:#C8C2AE;border-radius:6px;}
+
+  @media print{
+    @page{ size:A4; margin:0; }
+    body *{ visibility:hidden; }
+    .print-doc,.print-doc *{ visibility:visible; }
+    .print-doc{
+      display:block !important;
+      position:absolute; left:0; top:0; margin:0; box-shadow:none;
+      width:210mm; min-height:297mm;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell" id="appShell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar no-print">
+    <div class="brand">
+      <div class="brand-mark">Q</div>
+      <div class="brand-text">
+        <h1>Quote Desk</h1>
+        <p data-i18n="tagline">Quotes &amp; orders from your catalog</p>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <h2 data-i18n="langSectionTitle">Language</h2>
+      <div class="field">
+        <select id="langSelect">
+          <option value="en">English</option>
+          <option value="nl">Nederlands</option>
+          <option value="de">Deutsch</option>
+          <option value="fr">Français</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <h2 data-i18n="companySectionTitle">Your company (seller)</h2>
+      <div class="field"><label data-i18n="lblCompanyName">Company name</label><input id="c-name" placeholder="Acme Trading BV"></div>
+      <div class="field-row">
+        <div class="field"><label data-i18n="lblVat">VAT number</label><input id="c-vat" placeholder="BE0123.456.789"></div>
+        <div class="field"><label data-i18n="lblRegNo">Registration no.</label><input id="c-reg" placeholder="0123.456.789"></div>
+      </div>
+      <div class="field"><label data-i18n="lblAddress">Address</label><input id="c-addr1" placeholder="Street and number"></div>
+      <div class="field-row">
+        <div class="field"><label data-i18n="lblPostal">Postal code</label><input id="c-postal" placeholder="1800"></div>
+        <div class="field"><label data-i18n="lblCity">City</label><input id="c-city" placeholder="Vilvoorde"></div>
+      </div>
+      <div class="field"><label data-i18n="lblCountry">Country</label><input id="c-country" placeholder="Belgium"></div>
+      <div class="field-row">
+        <div class="field"><label data-i18n="lblPhone">Phone</label><input id="c-phone" placeholder="+32 ..."></div>
+        <div class="field"><label data-i18n="lblEmail">Email</label><input id="c-email" placeholder="sales@acme.be"></div>
+      </div>
+      <div class="field"><label data-i18n="lblWebsite">Website</label><input id="c-web" placeholder="www.acme.be"></div>
+      <div class="field-row">
+        <div class="field"><label data-i18n="lblIban">IBAN</label><input id="c-iban" placeholder="BE00 0000 0000 0000"></div>
+        <div class="field"><label data-i18n="lblBic">BIC</label><input id="c-bic" placeholder="XXXXBEBB"></div>
+      </div>
+      <button class="side-btn solid" id="saveCompanyBtn" data-i18n="btnSaveCompany">Save company profile</button>
+    </div>
+
+    <div class="side-section">
+      <h2 data-i18n="catalogSectionTitle">Product / service catalog</h2>
+      <div class="catalog-status" id="catalogStatus" data-i18n="catalogNone">No catalog loaded yet.</div>
+      <input type="file" id="csvInput" accept=".csv" style="display:none;">
+      <button class="side-btn solid" id="uploadBtn" data-i18n="btnUploadCsv">Upload CSV</button>
+      <button class="side-btn" id="clearCatalogBtn" data-i18n="btnClearCatalog">Clear catalog</button>
+      <div style="margin-top:8px;text-align:center;">
+        <button class="link-btn" id="sampleCsvBtn" data-i18n="btnSampleCsv">Download a sample CSV</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <div class="tabs no-print">
+      <button class="tab-btn active" data-tab="build" data-i18n="tabBuild">Build quote</button>
+      <button class="tab-btn" data-tab="preview" data-i18n="tabPreview">Preview &amp; print</button>
+      <button class="tab-btn" data-tab="archive" data-i18n="tabArchive">Archive</button>
+    </div>
+
+    <!-- ---------- BUILD TAB ---------- -->
+    <div class="tab-panel active" data-panel="build">
+      <div class="build-panels grid-2">
+
+        <!-- catalog picker -->
+        <div class="panel">
+          <h3 data-i18n="catalogPanelTitle">Catalog</h3>
+          <p class="sub" data-i18n="catalogPanelSub">Click an item to add it to the document.</p>
+          <div id="mappingArea"></div>
+          <div class="search-box">
+            <input type="text" id="catalogSearch" data-i18n-ph="searchPlaceholder" placeholder="Search code or description…">
+          </div>
+          <div class="catalog-list" id="catalogList">
+            <div class="empty-note" data-i18n="catalogEmpty">Upload a CSV in the sidebar to see your codes here.</div>
+          </div>
+        </div>
+
+        <!-- document builder -->
+        <div class="panel">
+          <h3 data-i18n="docPanelTitle">Document details</h3>
+          <p class="sub" data-i18n="docPanelSub">Choose a type, add your customer, then pick lines from the catalog.</p>
+
+          <div class="field-block">
+            <h4 data-i18n="sectionDocument">Document</h4>
+            <div class="form-grid cols-3">
+              <div><label data-i18n="fieldType">Type</label>
+                <select id="d-type">
+                  <option value="Quote" data-i18n="docTypeQuote">Quote</option>
+                  <option value="Order confirmation" data-i18n="docTypeOrder">Order confirmation</option>
+                  <option value="Invoice" data-i18n="docTypeInvoice">Invoice</option>
+                </select>
+              </div>
+              <div><label data-i18n="fieldNumber">Number</label><input id="d-number" data-i18n-ph="phAuto" placeholder="Auto"></div>
+              <div><label data-i18n="fieldDate">Date</label><input type="date" id="d-date"></div>
+              <div><label data-i18n="fieldValidUntil">Valid until</label><input type="date" id="d-valid"></div>
+              <div><label data-i18n="fieldCurrency">Currency</label>
+                <select id="d-currency">
+                  <option value="EUR">€ EUR</option>
+                  <option value="USD">$ USD</option>
+                  <option value="GBP">£ GBP</option>
+                  <option value="CHF">CHF</option>
+                </select>
+              </div>
+              <div><label data-i18n="fieldVatRate">Default VAT rate %</label><input type="number" id="d-vat" value="21" step="0.5"></div>
+            </div>
+          </div>
+
+          <div class="field-block">
+            <h4 data-i18n="sectionCustomer">Customer (buyer)</h4>
+            <div class="form-grid">
+              <div><label data-i18n="fieldCustomerName">Customer name</label><input id="k-name" data-i18n-ph="phClient" placeholder="Client company or person"></div>
+              <div><label data-i18n="lblVat">VAT number</label><input id="k-vat" data-i18n-ph="phOptional" placeholder="Optional"></div>
+              <div><label data-i18n="lblAddress">Address</label><input id="k-addr1" data-i18n-ph="phStreet" placeholder="Street and number"></div>
+              <div><label data-i18n="fieldCityPostal">City, postal code</label><input id="k-city" data-i18n-ph="fieldCityPostal" placeholder="City, postal code"></div>
+              <div><label data-i18n="lblCountry">Country</label><input id="k-country" data-i18n-ph="lblCountry" placeholder="Country"></div>
+              <div><label data-i18n="lblEmail">Email</label><input id="k-email" data-i18n-ph="phOptional" placeholder="Optional"></div>
+            </div>
+          </div>
+
+          <div class="field-block">
+            <h4 data-i18n="sectionLines">Lines</h4>
+            <table class="items">
+              <thead>
+                <tr><th style="width:12%;" data-i18n="colCode">Code</th><th data-i18n="colDescription">Description</th><th style="width:8%;" data-i18n="colQty">Qty</th><th style="width:13%;" data-i18n="colUnitPrice">Unit price</th><th style="width:9%;" data-i18n="colVat">VAT %</th><th style="width:13%;" data-i18n="colLineTotal">Line total</th><th></th></tr>
+              </thead>
+              <tbody id="itemsBody"></tbody>
+            </table>
+            <div id="itemsEmpty" class="empty-note" style="display:none;" data-i18n="itemsEmptyText">No lines yet — add items from the catalog, or add a blank line and type your own.</div>
+            <button class="btn ghost" id="addBlankLineBtn" style="margin-top:10px;" data-i18n="btnAddBlankLine">+ Add blank line</button>
+
+            <div class="totals-box">
+              <div class="row"><span data-i18n="totalsSubtotal">Subtotal</span><span id="t-subtotal">–</span></div>
+              <div id="t-vat-breakdown"></div>
+              <div class="row grand"><span data-i18n="totalsTotal">Total</span><span id="t-total">–</span></div>
+            </div>
+          </div>
+
+          <div class="field-block">
+            <h4 data-i18n="sectionTerms">Terms &amp; notes</h4>
+            <textarea id="d-terms" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:12.5px;min-height:60px;" data-i18n-ph="termsPlaceholder" placeholder="Payment terms, delivery conditions, validity…"></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn brass" id="goPreviewBtn" data-i18n="btnPreviewDoc">Preview document →</button>
+            <button class="btn ghost" id="resetQuoteBtn" data-i18n="btnResetQuote">Start new document</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ---------- PREVIEW TAB ---------- -->
+    <div class="tab-panel" data-panel="preview">
+      <div class="preview-toolbar no-print">
+        <button class="btn ghost" data-tab-jump="build" data-i18n="btnBackEdit">← Back to editing</button>
+        <button class="btn ghost" id="saveArchiveBtn" data-i18n="btnSaveArchive">Save to archive</button>
+        <button class="btn brass" id="printBtn" data-i18n="btnPrint">Print / Save as PDF</button>
+      </div>
+      <div class="preview-wrap">
+        <div class="print-doc" id="printDoc"></div>
+      </div>
+    </div>
+
+    <!-- ---------- ARCHIVE TAB ---------- -->
+    <div class="tab-panel" data-panel="archive">
+      <div class="panel" style="max-width:900px;">
+        <h3 data-i18n="archivePanelTitle">Document archive</h3>
+        <p class="sub" data-i18n="archivePanelSub">Look up simplified copies of past quotes, orders and invoices by customer name or VAT number.</p>
+        <div class="search-box">
+          <input type="text" id="archiveSearch" data-i18n-ph="archiveSearchPlaceholder" placeholder="Search by customer name or VAT number…">
+        </div>
+        <div class="archive-date-filter">
+          <div class="field">
+            <label data-i18n="archiveDateFrom">From date</label>
+            <input type="date" id="archiveDateFrom">
+          </div>
+          <div class="field">
+            <label data-i18n="archiveDateTo">To date</label>
+            <input type="date" id="archiveDateTo">
+          </div>
+          <button class="btn ghost" id="archiveClearFiltersBtn" data-i18n="btnClearFilters">Clear filters</button>
+        </div>
+        <div id="archiveList" class="archive-list"></div>
+      </div>
+      <div class="panel archive-detail-panel" id="archiveDetailPanel" style="max-width:900px;display:none;margin-top:18px;">
+        <div class="archive-detail-head">
+          <h3 id="archiveDetailTitle" style="margin:0;"></h3>
+          <button class="btn ghost" id="archiveCloseBtn" data-i18n="btnCloseDetail">Close</button>
+        </div>
+        <div id="archiveDetailBody"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  /* ---------------- storage shim for standalone hosting ----------------
+     Inside Claude.ai, window.storage is provided natively (per-user,
+     synced storage). If this file is hosted elsewhere (Netlify, GitHub
+     Pages, your own server, etc.) that API won't exist, so we fall back
+     to the browser's own localStorage with the same get/set/delete/list
+     shape. Nothing else in this file needs to change either way. */
+  if(typeof window.storage === 'undefined' || !window.storage){
+    const PREFIX = 'quotedesk:';
+    window.storage = {
+      async get(key, shared){
+        try{
+          const raw = window.localStorage.getItem(PREFIX + key);
+          if(raw === null) return null;
+          return {key, value: raw, shared: !!shared};
+        }catch(e){ return null; }
+      },
+      async set(key, value, shared){
+        try{
+          window.localStorage.setItem(PREFIX + key, value);
+          return {key, value, shared: !!shared};
+        }catch(e){ return null; }
+      },
+      async delete(key, shared){
+        try{
+          window.localStorage.removeItem(PREFIX + key);
+          return {key, deleted:true, shared: !!shared};
+        }catch(e){ return null; }
+      },
+      async list(prefix, shared){
+        try{
+          const keys = [];
+          for(let i=0;i<window.localStorage.length;i++){
+            const k = window.localStorage.key(i);
+            if(k && k.indexOf(PREFIX)===0){
+              const stripped = k.slice(PREFIX.length);
+              if(!prefix || stripped.indexOf(prefix)===0) keys.push(stripped);
+            }
+          }
+          return {keys, prefix, shared: !!shared};
+        }catch(e){ return null; }
+      }
+    };
+  }
+
+  const $ = (id)=>document.getElementById(id);
+  const todayISO = ()=> new Date().toISOString().slice(0,10);
+  const currencySymbols = {EUR:'€',USD:'$',GBP:'£',CHF:'CHF '};
+
+  /* ---------------- translations ---------------- */
+  const TRANSLATIONS = {
+    en:{
+      tagline:'Quotes & orders from your catalog',
+      langSectionTitle:'Language',
+      companySectionTitle:'Your company (seller)',
+      lblCompanyName:'Company name', lblVat:'VAT number', lblRegNo:'Registration no.', lblAddress:'Address',
+      lblPostal:'Postal code', lblCity:'City', lblCountry:'Country', lblPhone:'Phone', lblEmail:'Email',
+      lblWebsite:'Website', lblIban:'IBAN', lblBic:'BIC',
+      btnSaveCompany:'Save company profile', btnSaved:'Saved ✓',
+      catalogSectionTitle:'Product / service catalog', catalogNone:'No catalog loaded yet.',
+      catalogLoaded:(n,f)=> `<strong>${n} item${n===1?'':'s'}</strong> loaded${f? ' from '+f:''}.`,
+      btnUploadCsv:'Upload CSV', btnClearCatalog:'Clear catalog', btnSampleCsv:'Download a sample CSV',
+      tabBuild:'Build quote', tabPreview:'Preview & print',
+      catalogPanelTitle:'Catalog', catalogPanelSub:'Click an item to add it to the document.',
+      searchPlaceholder:'Search code or description…', catalogEmpty:'No catalog loaded. Upload a CSV in the sidebar, or switch to the Build tab and use "Add blank line" to type items in yourself.',
+      catalogNoMatch:'No codes match your search.',
+      docPanelTitle:'Document details', docPanelSub:'Choose a type, add your customer, then pick lines from the catalog.',
+      sectionDocument:'Document', fieldType:'Type', docTypeQuote:'Quote', docTypeOrder:'Order confirmation', docTypeInvoice:'Invoice',
+      fieldNumber:'Number', phAuto:'Auto', fieldDate:'Date', fieldValidUntil:'Valid until', fieldCurrency:'Currency', fieldVatRate:'Default VAT rate %',
+      sectionCustomer:'Customer (buyer)', fieldCustomerName:'Customer name', phClient:'Client company or person',
+      phOptional:'Optional', phStreet:'Street and number', fieldCityPostal:'City, postal code',
+      sectionLines:'Lines', colCode:'Code', colDescription:'Description', colQty:'Qty', colUnitPrice:'Unit price', colVat:'VAT %', colLineTotal:'Line total',
+      itemsEmptyText:'No lines yet — add items from the catalog, or add a blank line and type your own.',
+      btnAddBlankLine:'+ Add blank line', phLineCode:'Code', phLineDescription:'Description',
+      totalsSubtotal:'Subtotal', totalsVat:(r)=>`VAT (${r}%)`, totalsTotal:'Total',
+      sectionTerms:'Terms & notes', termsPlaceholder:'Payment terms, delivery conditions, validity…',
+      btnPreviewDoc:'Preview document →', btnResetQuote:'Start new document',
+      btnBackEdit:'← Back to editing', btnPrint:'Print / Save as PDF',
+      mappingTitle:(f)=>`Match your CSV columns (${f})`, mappingCode:'Code', mappingDescription:'Description', mappingPrice:'Price',
+      mappingUnit:'Unit (optional)', mappingVat:'VAT % (optional)', mappingNone:'— none —', btnUseCatalog:'Use this catalog',
+      alertMapping:'Please map at least Code, Description and Price.', alertCsvEmpty:'This CSV does not seem to contain any data rows.',
+      confirmClearCatalog:'Clear the loaded catalog?',
+      confirmReset:'Start a new document? This clears the customer, lines and notes (your company profile and catalog stay).',
+      defaultTerms:'Payment due within 30 days. Prices are exclusive of VAT unless stated otherwise. This document is valid until the date indicated above.',
+      docFrom:'From', docTo:'To', docNumber:'Number', docDate:'Date', docValidUntil:'Valid until', docCurrency:'Currency',
+      docSubtotal:'Subtotal', docVat:(r)=>`VAT (${r}%)`, docTotal:'Total', docTermsTitle:'Terms & notes',
+      docSignSeller:'Authorised signature — ', docSignBuyer:'Accepted by — ',
+      docAddDetails:'Add your company details in the sidebar.', docNoLines:'No lines added',
+      docYourCompany:'Your company name', placeCompanyName:'Acme Trading BV', addToDoc:'Add to document',
+      tabArchive:'Archive', btnSaveArchive:'Save to archive',
+      archivePanelTitle:'Document archive', archivePanelSub:'Look up simplified copies of past quotes, orders and invoices by customer name or VAT number.',
+      archiveSearchPlaceholder:'Search by customer name or VAT number…',
+      archiveDateFrom:'From date', archiveDateTo:'To date', btnClearFilters:'Clear filters',
+      archiveEmpty:'No documents saved yet. Save a document from the Preview tab to see it here.',
+      archiveNoMatch:'No documents match your search or date range.',
+      btnDeleteRecord:'Delete record', confirmDeleteRecord:'Delete this saved document? This cannot be undone.',
+      btnCloseDetail:'Close', docSavedLabel:'Saved'
+    },
+    nl:{
+      tagline:'Offertes & bestellingen uit uw catalogus',
+      langSectionTitle:'Taal',
+      companySectionTitle:'Uw bedrijf (verkoper)',
+      lblCompanyName:'Bedrijfsnaam', lblVat:'Btw-nummer', lblRegNo:'Ondernemingsnr.', lblAddress:'Adres',
+      lblPostal:'Postcode', lblCity:'Stad', lblCountry:'Land', lblPhone:'Telefoon', lblEmail:'E-mail',
+      lblWebsite:'Website', lblIban:'IBAN', lblBic:'BIC',
+      btnSaveCompany:'Bedrijfsprofiel opslaan', btnSaved:'Opgeslagen ✓',
+      catalogSectionTitle:'Product-/dienstencatalogus', catalogNone:'Nog geen catalogus geladen.',
+      catalogLoaded:(n,f)=> `<strong>${n} item${n===1?'':'s'}</strong> geladen${f? ' uit '+f:''}.`,
+      btnUploadCsv:'CSV uploaden', btnClearCatalog:'Catalogus wissen', btnSampleCsv:'Voorbeeld-CSV downloaden',
+      tabBuild:'Offerte opstellen', tabPreview:'Voorbeeld & afdrukken',
+      catalogPanelTitle:'Catalogus', catalogPanelSub:'Klik op een item om het aan het document toe te voegen.',
+      searchPlaceholder:'Zoek op code of omschrijving…', catalogEmpty:'Geen catalogus geladen. Upload een CSV in de zijbalk, of gebruik "Lege regel toevoegen" om zelf items in te typen.',
+      catalogNoMatch:'Geen codes komen overeen met uw zoekopdracht.',
+      docPanelTitle:'Documentgegevens', docPanelSub:'Kies een type, voeg uw klant toe en selecteer regels uit de catalogus.',
+      sectionDocument:'Document', fieldType:'Type', docTypeQuote:'Offerte', docTypeOrder:'Orderbevestiging', docTypeInvoice:'Factuur',
+      fieldNumber:'Nummer', phAuto:'Automatisch', fieldDate:'Datum', fieldValidUntil:'Geldig tot', fieldCurrency:'Munteenheid', fieldVatRate:'Standaard btw-tarief %',
+      sectionCustomer:'Klant (koper)', fieldCustomerName:'Naam klant', phClient:'Bedrijf of persoon',
+      phOptional:'Optioneel', phStreet:'Straat en nummer', fieldCityPostal:'Stad, postcode',
+      sectionLines:'Regels', colCode:'Code', colDescription:'Omschrijving', colQty:'Aantal', colUnitPrice:'Eenheidsprijs', colVat:'Btw %', colLineTotal:'Totaal regel',
+      itemsEmptyText:'Nog geen regels — voeg items toe uit de catalogus, of voeg een lege regel toe en typ zelf.',
+      btnAddBlankLine:'+ Lege regel toevoegen', phLineCode:'Code', phLineDescription:'Omschrijving',
+      totalsSubtotal:'Subtotaal', totalsVat:(r)=>`Btw (${r}%)`, totalsTotal:'Totaal',
+      sectionTerms:'Voorwaarden & opmerkingen', termsPlaceholder:'Betalingsvoorwaarden, leveringsvoorwaarden, geldigheid…',
+      btnPreviewDoc:'Document bekijken →', btnResetQuote:'Nieuw document starten',
+      btnBackEdit:'← Terug naar bewerken', btnPrint:'Afdrukken / opslaan als pdf',
+      mappingTitle:(f)=>`Koppel uw CSV-kolommen (${f})`, mappingCode:'Code', mappingDescription:'Omschrijving', mappingPrice:'Prijs',
+      mappingUnit:'Eenheid (optioneel)', mappingVat:'Btw % (optioneel)', mappingNone:'— geen —', btnUseCatalog:'Gebruik deze catalogus',
+      alertMapping:'Koppel minstens Code, Omschrijving en Prijs.', alertCsvEmpty:'Deze CSV lijkt geen gegevens te bevatten.',
+      confirmClearCatalog:'De geladen catalogus wissen?',
+      confirmReset:'Nieuw document starten? Klant, regels en opmerkingen worden gewist (bedrijfsprofiel en catalogus blijven behouden).',
+      defaultTerms:'Betaling binnen 30 dagen. Prijzen zijn exclusief btw, tenzij anders vermeld. Dit document is geldig tot de hierboven vermelde datum.',
+      docFrom:'Van', docTo:'Aan', docNumber:'Nummer', docDate:'Datum', docValidUntil:'Geldig tot', docCurrency:'Munteenheid',
+      docSubtotal:'Subtotaal', docVat:(r)=>`Btw (${r}%)`, docTotal:'Totaal', docTermsTitle:'Voorwaarden & opmerkingen',
+      docSignSeller:'Handtekening — ', docSignBuyer:'Voor akkoord — ',
+      docAddDetails:'Voeg uw bedrijfsgegevens toe in de zijbalk.', docNoLines:'Geen regels toegevoegd',
+      docYourCompany:'Naam van uw bedrijf', placeCompanyName:'Acme Trading BV', addToDoc:'Toevoegen aan document',
+      tabArchive:'Archief', btnSaveArchive:'Opslaan in archief',
+      archivePanelTitle:'Documentenarchief', archivePanelSub:'Zoek vereenvoudigde kopieën van eerdere offertes, bestellingen en facturen op klantnaam of btw-nummer.',
+      archiveSearchPlaceholder:'Zoek op klantnaam of btw-nummer…',
+      archiveDateFrom:'Vanaf datum', archiveDateTo:'Tot datum', btnClearFilters:'Filters wissen',
+      archiveEmpty:'Nog geen documenten opgeslagen. Sla een document op vanuit het tabblad Voorbeeld om het hier te zien.',
+      archiveNoMatch:'Geen documenten komen overeen met uw zoekopdracht of periode.',
+      btnDeleteRecord:'Record verwijderen', confirmDeleteRecord:'Dit opgeslagen document verwijderen? Dit kan niet ongedaan worden gemaakt.',
+      btnCloseDetail:'Sluiten', docSavedLabel:'Opgeslagen'
+    },
+    de:{
+      tagline:'Angebote & Aufträge aus Ihrem Katalog',
+      langSectionTitle:'Sprache',
+      companySectionTitle:'Ihr Unternehmen (Verkäufer)',
+      lblCompanyName:'Firmenname', lblVat:'USt-IdNr.', lblRegNo:'Handelsregister-Nr.', lblAddress:'Adresse',
+      lblPostal:'Postleitzahl', lblCity:'Stadt', lblCountry:'Land', lblPhone:'Telefon', lblEmail:'E-Mail',
+      lblWebsite:'Website', lblIban:'IBAN', lblBic:'BIC',
+      btnSaveCompany:'Firmenprofil speichern', btnSaved:'Gespeichert ✓',
+      catalogSectionTitle:'Produkt-/Dienstleistungskatalog', catalogNone:'Noch kein Katalog geladen.',
+      catalogLoaded:(n,f)=> `<strong>${n} Artikel</strong> geladen${f? ' aus '+f:''}.`,
+      btnUploadCsv:'CSV hochladen', btnClearCatalog:'Katalog löschen', btnSampleCsv:'Beispiel-CSV herunterladen',
+      tabBuild:'Angebot erstellen', tabPreview:'Vorschau & Druck',
+      catalogPanelTitle:'Katalog', catalogPanelSub:'Klicken Sie auf einen Artikel, um ihn dem Dokument hinzuzufügen.',
+      searchPlaceholder:'Code oder Beschreibung suchen…', catalogEmpty:'Kein Katalog geladen. Laden Sie in der Seitenleiste eine CSV-Datei hoch, oder verwenden Sie „Leere Zeile hinzufügen“, um Positionen selbst einzutragen.',
+      catalogNoMatch:'Keine Codes entsprechen Ihrer Suche.',
+      docPanelTitle:'Dokumentdetails', docPanelSub:'Wählen Sie einen Typ, fügen Sie Ihren Kunden hinzu und wählen Sie Positionen aus dem Katalog.',
+      sectionDocument:'Dokument', fieldType:'Typ', docTypeQuote:'Angebot', docTypeOrder:'Auftragsbestätigung', docTypeInvoice:'Rechnung',
+      fieldNumber:'Nummer', phAuto:'Automatisch', fieldDate:'Datum', fieldValidUntil:'Gültig bis', fieldCurrency:'Währung', fieldVatRate:'Standard-MwSt.-Satz %',
+      sectionCustomer:'Kunde (Käufer)', fieldCustomerName:'Kundenname', phClient:'Firma oder Person',
+      phOptional:'Optional', phStreet:'Straße und Hausnummer', fieldCityPostal:'Stadt, Postleitzahl',
+      sectionLines:'Positionen', colCode:'Code', colDescription:'Beschreibung', colQty:'Menge', colUnitPrice:'Einzelpreis', colVat:'MwSt. %', colLineTotal:'Gesamtpreis',
+      itemsEmptyText:'Noch keine Positionen — fügen Sie Artikel aus dem Katalog hinzu oder eine leere Zeile und tragen Sie selbst Daten ein.',
+      btnAddBlankLine:'+ Leere Zeile hinzufügen', phLineCode:'Code', phLineDescription:'Beschreibung',
+      totalsSubtotal:'Zwischensumme', totalsVat:(r)=>`MwSt. (${r}%)`, totalsTotal:'Gesamtsumme',
+      sectionTerms:'Bedingungen & Anmerkungen', termsPlaceholder:'Zahlungsbedingungen, Lieferbedingungen, Gültigkeit…',
+      btnPreviewDoc:'Dokument anzeigen →', btnResetQuote:'Neues Dokument starten',
+      btnBackEdit:'← Zurück zur Bearbeitung', btnPrint:'Drucken / als PDF speichern',
+      mappingTitle:(f)=>`Ordnen Sie Ihre CSV-Spalten zu (${f})`, mappingCode:'Code', mappingDescription:'Beschreibung', mappingPrice:'Preis',
+      mappingUnit:'Einheit (optional)', mappingVat:'MwSt. % (optional)', mappingNone:'— keine —', btnUseCatalog:'Diesen Katalog verwenden',
+      alertMapping:'Bitte ordnen Sie mindestens Code, Beschreibung und Preis zu.', alertCsvEmpty:'Diese CSV-Datei scheint keine Datenzeilen zu enthalten.',
+      confirmClearCatalog:'Den geladenen Katalog löschen?',
+      confirmReset:'Neues Dokument starten? Kunde, Positionen und Anmerkungen werden gelöscht (Firmenprofil und Katalog bleiben erhalten).',
+      defaultTerms:'Zahlbar innerhalb von 30 Tagen. Preise verstehen sich zzgl. MwSt., sofern nicht anders angegeben. Dieses Dokument ist bis zum oben angegebenen Datum gültig.',
+      docFrom:'Von', docTo:'An', docNumber:'Nummer', docDate:'Datum', docValidUntil:'Gültig bis', docCurrency:'Währung',
+      docSubtotal:'Zwischensumme', docVat:(r)=>`MwSt. (${r}%)`, docTotal:'Gesamtsumme', docTermsTitle:'Bedingungen & Anmerkungen',
+      docSignSeller:'Unterschrift — ', docSignBuyer:'Angenommen von — ',
+      docAddDetails:'Fügen Sie Ihre Firmendaten in der Seitenleiste hinzu.', docNoLines:'Keine Positionen hinzugefügt',
+      docYourCompany:'Ihr Firmenname', placeCompanyName:'Acme Trading BV', addToDoc:'Zum Dokument hinzufügen',
+      tabArchive:'Archiv', btnSaveArchive:'Im Archiv speichern',
+      archivePanelTitle:'Dokumentenarchiv', archivePanelSub:'Suchen Sie vereinfachte Kopien früherer Angebote, Aufträge und Rechnungen nach Kundenname oder USt-IdNr.',
+      archiveSearchPlaceholder:'Nach Kundenname oder USt-IdNr. suchen…',
+      archiveDateFrom:'Von Datum', archiveDateTo:'Bis Datum', btnClearFilters:'Filter zurücksetzen',
+      archiveEmpty:'Noch keine Dokumente gespeichert. Speichern Sie ein Dokument über den Tab „Vorschau“, um es hier zu sehen.',
+      archiveNoMatch:'Keine Dokumente entsprechen Ihrer Suche oder dem Zeitraum.',
+      btnDeleteRecord:'Eintrag löschen', confirmDeleteRecord:'Dieses gespeicherte Dokument löschen? Dies kann nicht rückgängig gemacht werden.',
+      btnCloseDetail:'Schließen', docSavedLabel:'Gespeichert'
+    },
+    fr:{
+      tagline:'Devis & commandes à partir de votre catalogue',
+      langSectionTitle:'Langue',
+      companySectionTitle:'Votre société (vendeur)',
+      lblCompanyName:'Nom de la société', lblVat:'Numéro de TVA', lblRegNo:"N° d'entreprise", lblAddress:'Adresse',
+      lblPostal:'Code postal', lblCity:'Ville', lblCountry:'Pays', lblPhone:'Téléphone', lblEmail:'E-mail',
+      lblWebsite:'Site web', lblIban:'IBAN', lblBic:'BIC',
+      btnSaveCompany:'Enregistrer le profil', btnSaved:'Enregistré ✓',
+      catalogSectionTitle:'Catalogue produits / services', catalogNone:'Aucun catalogue chargé pour le moment.',
+      catalogLoaded:(n,f)=> `<strong>${n} article${n===1?'':'s'}</strong> chargé${n===1?'':'s'}${f? ' depuis '+f:''}.`,
+      btnUploadCsv:'Importer un CSV', btnClearCatalog:'Effacer le catalogue', btnSampleCsv:'Télécharger un exemple de CSV',
+      tabBuild:'Créer un devis', tabPreview:'Aperçu & impression',
+      catalogPanelTitle:'Catalogue', catalogPanelSub:'Cliquez sur un article pour l’ajouter au document.',
+      searchPlaceholder:'Rechercher un code ou une description…', catalogEmpty:'Aucun catalogue chargé. Importez un CSV dans la barre latérale, ou utilisez « Ajouter une ligne vierge » pour saisir vos articles vous-même.',
+      catalogNoMatch:'Aucun code ne correspond à votre recherche.',
+      docPanelTitle:'Détails du document', docPanelSub:'Choisissez un type, ajoutez votre client, puis sélectionnez des lignes du catalogue.',
+      sectionDocument:'Document', fieldType:'Type', docTypeQuote:'Devis', docTypeOrder:'Confirmation de commande', docTypeInvoice:'Facture',
+      fieldNumber:'Numéro', phAuto:'Automatique', fieldDate:'Date', fieldValidUntil:"Valable jusqu'au", fieldCurrency:'Devise', fieldVatRate:'Taux de TVA par défaut %',
+      sectionCustomer:'Client (acheteur)', fieldCustomerName:'Nom du client', phClient:'Société ou personne',
+      phOptional:'Facultatif', phStreet:'Rue et numéro', fieldCityPostal:'Ville, code postal',
+      sectionLines:'Lignes', colCode:'Code', colDescription:'Description', colQty:'Qté', colUnitPrice:'Prix unitaire', colVat:'TVA %', colLineTotal:'Total ligne',
+      itemsEmptyText:'Aucune ligne pour le moment — ajoutez des articles depuis le catalogue, ou ajoutez une ligne vierge et saisissez vos propres données.',
+      btnAddBlankLine:'+ Ajouter une ligne vierge', phLineCode:'Code', phLineDescription:'Description',
+      totalsSubtotal:'Sous-total', totalsVat:(r)=>`TVA (${r}%)`, totalsTotal:'Total',
+      sectionTerms:'Conditions & notes', termsPlaceholder:'Conditions de paiement, de livraison, validité…',
+      btnPreviewDoc:'Aperçu du document →', btnResetQuote:'Nouveau document',
+      btnBackEdit:'← Retour à l’édition', btnPrint:'Imprimer / enregistrer en PDF',
+      mappingTitle:(f)=>`Faites correspondre vos colonnes CSV (${f})`, mappingCode:'Code', mappingDescription:'Description', mappingPrice:'Prix',
+      mappingUnit:'Unité (facultatif)', mappingVat:'TVA % (facultatif)', mappingNone:'— aucune —', btnUseCatalog:'Utiliser ce catalogue',
+      alertMapping:'Veuillez associer au moins le code, la description et le prix.', alertCsvEmpty:'Ce fichier CSV ne semble contenir aucune donnée.',
+      confirmClearCatalog:'Effacer le catalogue chargé ?',
+      confirmReset:'Démarrer un nouveau document ? Le client, les lignes et les notes seront effacés (le profil de la société et le catalogue restent inchangés).',
+      defaultTerms:"Paiement à 30 jours. Les prix s'entendent hors TVA sauf indication contraire. Ce document est valable jusqu'à la date indiquée ci-dessus.",
+      docFrom:'De', docTo:'À', docNumber:'Numéro', docDate:'Date', docValidUntil:"Valable jusqu'au", docCurrency:'Devise',
+      docSubtotal:'Sous-total', docVat:(r)=>`TVA (${r}%)`, docTotal:'Total', docTermsTitle:'Conditions & notes',
+      docSignSeller:'Signature — ', docSignBuyer:'Pour accord — ',
+      docAddDetails:'Ajoutez les informations de votre société dans la barre latérale.', docNoLines:'Aucune ligne ajoutée',
+      docYourCompany:'Nom de votre société', placeCompanyName:'Acme Trading BV', addToDoc:'Ajouter au document',
+      tabArchive:'Archives', btnSaveArchive:'Enregistrer dans les archives',
+      archivePanelTitle:'Archives des documents', archivePanelSub:'Recherchez des copies simplifiées des devis, commandes et factures précédents par nom de client ou numéro de TVA.',
+      archiveSearchPlaceholder:'Rechercher par nom de client ou numéro de TVA…',
+      archiveDateFrom:'Date de début', archiveDateTo:'Date de fin', btnClearFilters:'Effacer les filtres',
+      archiveEmpty:'Aucun document enregistré pour le moment. Enregistrez un document depuis l’onglet Aperçu pour le voir ici.',
+      archiveNoMatch:'Aucun document ne correspond à votre recherche ou à la période choisie.',
+      btnDeleteRecord:"Supprimer l'entrée", confirmDeleteRecord:'Supprimer ce document enregistré ? Cette action est irréversible.',
+      btnCloseDetail:'Fermer', docSavedLabel:'Enregistré'
+    }
+  };
+  let currentLang = 'en';
+  const T = (key)=> (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]!==undefined) ? TRANSLATIONS[currentLang][key] : TRANSLATIONS.en[key];
+  const LOCALE_MAP = {en:'en-GB', nl:'nl-BE', de:'de-DE', fr:'fr-BE'};
+  function formatTimestamp(iso){
+    if(!iso) return '';
+    try{
+      const d = new Date(iso);
+      return new Intl.DateTimeFormat(LOCALE_MAP[currentLang]||'en-GB', {dateStyle:'medium', timeStyle:'short'}).format(d);
+    }catch(e){ return iso; }
+  }
+
+  let state = {
+    company:{name:'',vat:'',reg:'',addr1:'',postal:'',city:'',country:'',phone:'',email:'',web:'',iban:'',bic:''},
+    catalog:[], headers:[], rawRows:[], mapping:{code:-1,description:-1,price:-1,unit:-1,vat:-1}, catalogFileName:'',
+    client:{name:'',vat:'',addr1:'',city:'',country:'',email:''},
+    doc:{type:'Quote',number:'',date:todayISO(),valid:'',currency:'EUR',vat:21,terms:'Payment due within 30 days. Prices are exclusive of VAT unless stated otherwise. This document is valid until the date indicated above.',savedAt:null},
+    items:[],
+    counter:1,
+    archive:[]
+  };
+  let nextItemId = 1;
+
+  /* ---------------- storage ---------------- */
+  async function loadAll(){
+    try{
+      const c = await window.storage.get('company-profile');
+      if(c && c.value){ Object.assign(state.company, JSON.parse(c.value)); }
+    }catch(e){}
+    try{
+      const cat = await window.storage.get('catalog-data');
+      if(cat && cat.value){
+        const d = JSON.parse(cat.value);
+        state.catalog = d.catalog||[]; state.headers=d.headers||[]; state.mapping=d.mapping||state.mapping;
+        state.catalogFileName = d.fileName||'';
+      }
+    }catch(e){}
+    try{
+      const n = await window.storage.get('doc-counter');
+      if(n && n.value){ state.counter = parseInt(n.value,10)||1; }
+    }catch(e){}
+    try{
+      const arc = await window.storage.get('document-archive');
+      if(arc && arc.value){ state.archive = JSON.parse(arc.value)||[]; }
+    }catch(e){}
+    fillCompanyForm();
+    renderCatalogStatus();
+    renderCatalogList();
+    renderArchiveList();
+  }
+  async function saveCompany(){
+    readCompanyForm();
+    try{ await window.storage.set('company-profile', JSON.stringify(state.company)); }catch(e){}
+  }
+  async function saveCatalog(){
+    try{
+      await window.storage.set('catalog-data', JSON.stringify({catalog:state.catalog,headers:state.headers,mapping:state.mapping,fileName:state.catalogFileName}));
+    }catch(e){}
+  }
+  async function saveCounter(){
+    try{ await window.storage.set('doc-counter', String(state.counter)); }catch(e){}
+  }
+  async function persistArchive(){
+    try{ await window.storage.set('document-archive', JSON.stringify(state.archive)); }catch(e){}
+  }
+
+  /* ---------------- company form ---------------- */
+  function fillCompanyForm(){
+    $('c-name').value=state.company.name||'';
+    $('c-vat').value=state.company.vat||'';
+    $('c-reg').value=state.company.reg||'';
+    $('c-addr1').value=state.company.addr1||'';
+    $('c-postal').value=state.company.postal||'';
+    $('c-city').value=state.company.city||'';
+    $('c-country').value=state.company.country||'';
+    $('c-phone').value=state.company.phone||'';
+    $('c-email').value=state.company.email||'';
+    $('c-web').value=state.company.web||'';
+    $('c-iban').value=state.company.iban||'';
+    $('c-bic').value=state.company.bic||'';
+  }
+  function readCompanyForm(){
+    state.company = {
+      name:$('c-name').value.trim(), vat:$('c-vat').value.trim(), reg:$('c-reg').value.trim(),
+      addr1:$('c-addr1').value.trim(), postal:$('c-postal').value.trim(), city:$('c-city').value.trim(),
+      country:$('c-country').value.trim(), phone:$('c-phone').value.trim(), email:$('c-email').value.trim(),
+      web:$('c-web').value.trim(), iban:$('c-iban').value.trim(), bic:$('c-bic').value.trim()
+    };
+  }
+
+  /* ---------------- CSV parsing ---------------- */
+  function parseCSV(str){
+    const rows=[]; let row=[], field='', inQuotes=false;
+    for(let i=0;i<str.length;i++){
+      const c=str[i];
+      if(inQuotes){
+        if(c==='"'){ if(str[i+1]==='"'){field+='"';i++;} else inQuotes=false; }
+        else field+=c;
+      } else {
+        if(c==='"') inQuotes=true;
+        else if(c===','){ row.push(field); field=''; }
+        else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+        else if(c==='\r'){}
+        else field+=c;
+      }
+    }
+    if(field.length || row.length){ row.push(field); rows.push(row); }
+    return rows.filter(r=> r.some(f=> f.trim()!==''));
+  }
+  const ALIASES = {
+    code:['code','sku','item code','ref','reference','id','item no','article'],
+    description:['description','desc','name','item','label','product','service'],
+    price:['price','unit price','unitprice','rate','cost','amount','sales price'],
+    unit:['unit','uom','unit of measure'],
+    vat:['vat','vat rate','vat%','btw','btw-tarief','tva','mwst','tax','tax rate']
+  };
+  function guessColumn(headers, key){
+    const aliases = ALIASES[key];
+    for(let i=0;i<headers.length;i++){
+      const h = headers[i].trim().toLowerCase();
+      if(aliases.includes(h)) return i;
+    }
+    for(let i=0;i<headers.length;i++){
+      const h = headers[i].trim().toLowerCase();
+      if(aliases.some(a=> h.includes(a))) return i;
+    }
+    return -1;
+  }
+
+  function handleFile(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const rows = parseCSV(String(e.target.result));
+      if(rows.length < 2){ alert(T('alertCsvEmpty')); return; }
+      state.headers = rows[0];
+      state.rawRows = rows.slice(1);
+      state.catalogFileName = file.name;
+      state.mapping = {
+        code: guessColumn(state.headers,'code'),
+        description: guessColumn(state.headers,'description'),
+        price: guessColumn(state.headers,'price'),
+        unit: guessColumn(state.headers,'unit'),
+        vat: guessColumn(state.headers,'vat')
+      };
+      renderMapping();
+    };
+    reader.readAsText(file);
+  }
+
+  function renderMapping(){
+    const el = $('mappingArea');
+    const opts = (selected)=> state.headers.map((h,i)=> `<option value="${i}" ${i===selected?'selected':''}>${escapeHtml(h)}</option>`).join('') + `<option value="-1" ${selected===-1?'selected':''}>${T('mappingNone')}</option>`;
+    el.innerHTML = `
+      <div style="background:var(--brass-tint);border:1px solid var(--brass);border-radius:4px;padding:12px 14px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:600;color:var(--brass-dark);margin-bottom:8px;">${T('mappingTitle')(escapeHtml(state.catalogFileName))}</div>
+        <table class="mapping-table">
+          <tr><th>${T('mappingCode')}</th><td><select id="map-code">${opts(state.mapping.code)}</select></td></tr>
+          <tr><th>${T('mappingDescription')}</th><td><select id="map-description">${opts(state.mapping.description)}</select></td></tr>
+          <tr><th>${T('mappingPrice')}</th><td><select id="map-price">${opts(state.mapping.price)}</select></td></tr>
+          <tr><th>${T('mappingUnit')}</th><td><select id="map-unit">${opts(state.mapping.unit)}</select></td></tr>
+          <tr><th>${T('mappingVat')}</th><td><select id="map-vat">${opts(state.mapping.vat)}</select></td></tr>
+        </table>
+        <button class="btn brass" id="confirmMapBtn" style="padding:7px 14px;font-size:12px;">${T('btnUseCatalog')}</button>
+      </div>`;
+    $('confirmMapBtn').onclick = confirmMapping;
+  }
+
+  function confirmMapping(){
+    const mCode = parseInt($('map-code').value,10);
+    const mDesc = parseInt($('map-description').value,10);
+    const mPrice = parseInt($('map-price').value,10);
+    const mUnit = parseInt($('map-unit').value,10);
+    const mVat = parseInt($('map-vat').value,10);
+    if(mCode<0 || mDesc<0 || mPrice<0){ alert(T('alertMapping')); return; }
+    state.mapping = {code:mCode, description:mDesc, price:mPrice, unit:mUnit, vat:mVat};
+    state.catalog = state.rawRows.map(r=>({
+      code: (r[mCode]||'').trim(),
+      description: (r[mDesc]||'').trim(),
+      price: parseFloat((r[mPrice]||'0').replace(',','.').replace(/[^0-9.\-]/g,'')) || 0,
+      unit: mUnit>=0 ? (r[mUnit]||'').trim() : '',
+      vat: mVat>=0 ? (function(){ const v = parseFloat((r[mVat]||'').replace(',','.').replace(/[^0-9.\-]/g,'')); return isNaN(v) ? null : v; })() : null
+    })).filter(x=> x.code || x.description);
+    $('mappingArea').innerHTML='';
+    saveCatalog();
+    renderCatalogStatus();
+    renderCatalogList();
+  }
+
+  function renderCatalogStatus(){
+    const el = $('catalogStatus');
+    if(state.catalog.length===0){
+      el.innerHTML = T('catalogNone');
+    } else {
+      el.innerHTML = T('catalogLoaded')(state.catalog.length, state.catalogFileName? escapeHtml(state.catalogFileName): '');
+    }
+  }
+
+  /* ---------------- catalog list / search ---------------- */
+  function renderCatalogList(){
+    const list = $('catalogList');
+    const q = ($('catalogSearch').value||'').toLowerCase().trim();
+    const items = state.catalog.filter(it=> !q || it.code.toLowerCase().includes(q) || it.description.toLowerCase().includes(q));
+    if(state.catalog.length===0){
+      list.innerHTML = `<div class="empty-note">${T('catalogEmpty')}</div>`;
+      return;
+    }
+    if(items.length===0){
+      list.innerHTML = `<div class="empty-note">${T('catalogNoMatch')}</div>`;
+      return;
+    }
+    const sym = currencySymbols[state.doc.currency]||'';
+    list.innerHTML = items.slice(0,400).map((it,i)=>{
+      const realIndex = state.catalog.indexOf(it);
+      return `<div class="catalog-row" data-idx="${realIndex}">
+        <span class="code">${escapeHtml(it.code)}</span>
+        <span class="desc">${escapeHtml(it.description)}</span>
+        <span class="price">${sym}${it.price.toFixed(2)}${(it.vat!==null && it.vat!==undefined)? ` <em class="vat-badge">${it.vat}%</em>`:''}</span>
+        <button class="add" title="${T('addToDoc')}">+</button>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.catalog-row').forEach(row=>{
+      row.addEventListener('click', ()=> addItem(parseInt(row.dataset.idx,10)));
+    });
+  }
+
+  /* ---------------- line items ---------------- */
+  function addItem(catalogIndex){
+    const c = state.catalog[catalogIndex];
+    if(!c) return;
+    const defaultVat = parseFloat($('d-vat').value)||0;
+    const lineVat = (c.vat!==null && c.vat!==undefined && !isNaN(c.vat)) ? c.vat : defaultVat;
+    state.items.push({id: nextItemId++, code:c.code, description:c.description, unit:c.unit, qty:1, price:c.price, vat:lineVat});
+    state.doc.savedAt = null;
+    renderItems();
+  }
+  function addBlankItem(){
+    const defaultVat = parseFloat($('d-vat').value)||0;
+    state.items.push({id: nextItemId++, code:'', description:'', unit:'', qty:1, price:0, vat:defaultVat});
+    state.doc.savedAt = null;
+    renderItems();
+    const body = $('itemsBody');
+    const lastRow = body.querySelector('tr:last-child');
+    if(lastRow){
+      const firstInput = lastRow.querySelector('input[data-f="code"]');
+      if(firstInput) firstInput.focus();
+    }
+  }
+  function removeItem(id){
+    state.items = state.items.filter(i=> i.id!==id);
+    state.doc.savedAt = null;
+    renderItems();
+  }
+  function updateItem(id, field, value){
+    const it = state.items.find(i=> i.id===id);
+    if(!it) return;
+    if(field==='qty' || field==='price' || field==='vat'){ it[field] = parseFloat(value.replace(',','.'))||0; }
+    else { it[field] = value; }
+    state.doc.savedAt = null;
+    // Update only the line total for this row in place — rebuilding the whole
+    // table here would recreate every <input>, stealing focus mid-keystroke.
+    const sym = currencySymbols[state.doc.currency]||'';
+    const tr = $('itemsBody').querySelector(`tr[data-id="${id}"]`);
+    if(tr){
+      const totalCell = tr.querySelector('td.num');
+      if(totalCell) totalCell.textContent = sym + (it.qty*it.price).toFixed(2);
+    }
+    renderTotals();
+  }
+  function renderItems(){
+    const body = $('itemsBody');
+    const sym = currencySymbols[state.doc.currency]||'';
+    $('itemsEmpty').style.display = state.items.length===0 ? 'block':'none';
+    body.innerHTML = state.items.map(it=>{
+      const lineTotal = it.qty * it.price;
+      return `<tr data-id="${it.id}">
+        <td><input value="${escapeAttr(it.code)}" data-f="code" placeholder="${T('phLineCode')}"></td>
+        <td class="desc-cell"><input value="${escapeAttr(it.description)}" data-f="description" placeholder="${T('phLineDescription')}"></td>
+        <td><input value="${it.qty}" data-f="qty" style="text-align:right;"></td>
+        <td><input value="${it.price}" data-f="price" style="text-align:right;"></td>
+        <td><input value="${it.vat}" data-f="vat" style="text-align:right;"></td>
+        <td class="num">${sym}${lineTotal.toFixed(2)}</td>
+        <td><button class="rm" title="Remove">✕</button></td>
+      </tr>`;
+    }).join('');
+    body.querySelectorAll('tr').forEach(tr=>{
+      const id = parseInt(tr.dataset.id,10);
+      tr.querySelectorAll('input').forEach(inp=>{
+        inp.addEventListener('input', ()=> updateItem(id, inp.dataset.f, inp.value));
+      });
+      tr.querySelector('.rm').addEventListener('click', ()=> removeItem(id));
+    });
+    renderTotals();
+  }
+
+  function computeTotals(){
+    const subtotal = state.items.reduce((s,it)=> s + it.qty*it.price, 0);
+    const byRate = {};
+    state.items.forEach(it=>{
+      const rate = parseFloat(it.vat)||0;
+      const base = it.qty*it.price;
+      if(!byRate[rate]) byRate[rate] = {rate, base:0, vat:0};
+      byRate[rate].base += base;
+      byRate[rate].vat += base*rate/100;
+    });
+    const breakdown = Object.values(byRate).sort((a,b)=> b.rate-a.rate);
+    const vatAmount = breakdown.reduce((s,b)=> s+b.vat, 0);
+    const total = subtotal + vatAmount;
+    return {subtotal, vatAmount, total, breakdown};
+  }
+  function renderTotals(){
+    const sym = currencySymbols[state.doc.currency]||'';
+    const t = computeTotals();
+    $('t-subtotal').textContent = sym + t.subtotal.toFixed(2);
+    $('t-vat-breakdown').innerHTML = t.breakdown.length===0
+      ? `<div class="row"><span>${T('totalsVat')(0)}</span><span>${sym}0.00</span></div>`
+      : t.breakdown.map(b=> `<div class="row"><span>${T('totalsVat')(b.rate)}</span><span>${sym}${b.vat.toFixed(2)}</span></div>`).join('');
+    $('t-total').textContent = sym + t.total.toFixed(2);
+  }
+
+  /* ---------------- doc meta / client read ---------------- */
+  function readDocAndClient(){
+    state.doc.type = $('d-type').value;
+    state.doc.number = $('d-number').value.trim();
+    state.doc.date = $('d-date').value;
+    state.doc.valid = $('d-valid').value;
+    state.doc.currency = $('d-currency').value;
+    state.doc.vat = parseFloat($('d-vat').value)||0;
+    state.doc.terms = $('d-terms').value;
+    state.client = {
+      name:$('k-name').value.trim(), vat:$('k-vat').value.trim(), addr1:$('k-addr1').value.trim(),
+      city:$('k-city').value.trim(), country:$('k-country').value.trim(), email:$('k-email').value.trim()
+    };
+  }
+
+  function generateNumber(){
+    const prefix = state.doc.type==='Invoice' ? 'INV' : state.doc.type==='Order confirmation' ? 'ORD' : 'QTE';
+    const year = new Date().getFullYear();
+    const num = `${prefix}-${year}-${String(state.counter).padStart(4,'0')}`;
+    state.counter++;
+    saveCounter();
+    return num;
+  }
+
+  /* ---------------- render print document ---------------- */
+  function renderDocument(){
+    readDocAndClient();
+    if(!state.doc.number){
+      state.doc.number = generateNumber();
+      $('d-number').value = state.doc.number;
+    }
+    const sym = currencySymbols[state.doc.currency]||'';
+    const t = computeTotals();
+    const co = state.company, cl = state.client;
+    const typeKey = state.doc.type==='Invoice' ? 'docTypeInvoice' : state.doc.type==='Order confirmation' ? 'docTypeOrder' : 'docTypeQuote';
+    const typeLabel = T(typeKey);
+    const vatWord = currentLang==='de' ? 'USt-IdNr. ' : currentLang==='fr' ? 'TVA ' : currentLang==='nl' ? 'Btw ' : 'VAT ';
+    const regWord = currentLang==='de' ? 'HRB ' : currentLang==='fr' ? "N° d'entreprise " : currentLang==='nl' ? 'Ondern.nr. ' : 'Reg. no. ';
+    const ibanWord = 'IBAN '; const bicWord = 'BIC ';
+
+    const legalLines = [
+      [co.addr1, co.postal, co.city].filter(Boolean).join(', '),
+      co.country,
+      co.vat ? vatWord+co.vat : '',
+      co.reg ? regWord+co.reg : '',
+      [co.phone, co.email].filter(Boolean).join(' · '),
+      co.web
+    ].filter(Boolean).map(l=> `<div>${escapeHtml(l)}</div>`).join('');
+
+    const clientLines = [
+      cl.addr1,
+      [cl.city, cl.country].filter(Boolean).join(', '),
+      cl.vat ? vatWord+cl.vat : '',
+      cl.email
+    ].filter(Boolean).map(l=> `<div>${escapeHtml(l)}</div>`).join('');
+
+    const rows = state.items.map(it=> `
+      <tr>
+        <td class="code">${escapeHtml(it.code)}</td>
+        <td>${escapeHtml(it.description)}</td>
+        <td class="num">${it.qty}${it.unit? ' '+escapeHtml(it.unit):''}</td>
+        <td class="num">${sym}${it.price.toFixed(2)}</td>
+        <td class="num">${(parseFloat(it.vat)||0)}%</td>
+        <td class="num">${sym}${(it.qty*it.price).toFixed(2)}</td>
+      </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--slate);padding:18px;">${T('docNoLines')}</td></tr>`;
+
+    const footerBits = [co.name, co.vat?(vatWord+co.vat):'', co.iban?(ibanWord+co.iban):'', co.bic?(bicWord+co.bic):''].filter(Boolean).join('   ·   ');
+
+    $('printDoc').innerHTML = `
+      <div class="doc-head">
+        <div class="doc-seller">
+          <h2>${escapeHtml(co.name||T('docYourCompany'))}</h2>
+          <div class="legal-lines">${legalLines || T('docAddDetails')}</div>
+        </div>
+        <div class="doc-stamp">
+          <div class="badge">${escapeHtml(typeLabel)}<br>${escapeHtml(state.doc.number)}</div>
+        </div>
+      </div>
+
+      <div class="doc-title">${escapeHtml(typeLabel)}</div>
+      <div class="doc-meta-row">
+        <div>${T('docNumber')}<span>${escapeHtml(state.doc.number)}</span></div>
+        <div>${T('docDate')}<span>${state.doc.date||'–'}</span></div>
+        <div>${T('docValidUntil')}<span>${state.doc.valid||'–'}</span></div>
+        <div>${T('docCurrency')}<span>${state.doc.currency}</span></div>
+        ${state.doc.savedAt? `<div>${T('docSavedLabel')}<span>${escapeHtml(formatTimestamp(state.doc.savedAt))}</span></div>` : ''}
+      </div>
+
+      <div class="parties">
+        <div class="party">
+          <h5>${T('docFrom')}</h5>
+          <div class="name">${escapeHtml(co.name||'—')}</div>
+          <div class="lines">${legalLines}</div>
+        </div>
+        <div class="party">
+          <h5>${T('docTo')}</h5>
+          <div class="name">${escapeHtml(cl.name||'—')}</div>
+          <div class="lines">${clientLines}</div>
+        </div>
+      </div>
+
+      <table class="doc-items">
+        <thead><tr><th style="width:13%;">${T('colCode')}</th><th>${T('colDescription')}</th><th class="num" style="width:10%;">${T('colQty')}</th><th class="num" style="width:13%;">${T('colUnitPrice')}</th><th class="num" style="width:9%;">${T('colVat')}</th><th class="num" style="width:13%;">${T('colLineTotal')}</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+
+      <div class="doc-totals">
+        <div class="row"><span>${T('docSubtotal')}</span><span>${sym}${t.subtotal.toFixed(2)}</span></div>
+        ${t.breakdown.length===0
+          ? `<div class="row"><span>${T('docVat')(0)}</span><span>${sym}0.00</span></div>`
+          : t.breakdown.map(b=> `<div class="row"><span>${T('docVat')(b.rate)}</span><span>${sym}${b.vat.toFixed(2)}</span></div>`).join('')}
+        <div class="row grand"><span>${T('docTotal')}</span><span>${sym}${t.total.toFixed(2)}</span></div>
+      </div>
+
+      <div class="doc-terms">
+        <h5>${T('docTermsTitle')}</h5>
+        <div>${escapeHtml(state.doc.terms).replace(/\n/g,'<br>')}</div>
+      </div>
+
+      <div class="doc-sign">
+        <div class="sign-block">${T('docSignSeller')}${escapeHtml(co.name||T('sectionCustomer'))}</div>
+        <div class="sign-block">${T('docSignBuyer')}${escapeHtml(cl.name||T('fieldCustomerName'))}</div>
+      </div>
+
+      <div class="doc-footer">${escapeHtml(footerBits)}</div>
+    `;
+  }
+
+  /* ---------------- archive ---------------- */
+  function buildArchiveRecord(){
+    const t = computeTotals();
+    return {
+      id: state.doc.number,
+      type: state.doc.type,
+      number: state.doc.number,
+      date: state.doc.date,
+      valid: state.doc.valid,
+      currency: state.doc.currency,
+      client: {name: state.client.name, vat: state.client.vat, city: state.client.city, country: state.client.country, email: state.client.email},
+      items: state.items.map(it=> ({code:it.code, description:it.description, qty:it.qty, unit:it.unit, price:it.price, vat:it.vat})),
+      subtotal: t.subtotal, vatAmount: t.vatAmount, total: t.total, breakdown: t.breakdown,
+      savedAt: state.doc.savedAt
+    };
+  }
+  async function saveToArchive(){
+    readDocAndClient();
+    if(!state.doc.number){ state.doc.number = generateNumber(); $('d-number').value = state.doc.number; }
+    state.doc.savedAt = new Date().toISOString();
+    renderDocument();
+    const record = buildArchiveRecord();
+    const idx = state.archive.findIndex(r=> r.id===record.id);
+    if(idx>=0){ state.archive[idx] = record; } else { state.archive.unshift(record); }
+    await persistArchive();
+    renderArchiveList();
+    return record;
+  }
+  function deleteArchiveRecord(id){
+    state.archive = state.archive.filter(r=> r.id!==id);
+    persistArchive();
+    renderArchiveList();
+    if($('archiveDetailPanel').dataset.openId === id){ $('archiveDetailPanel').style.display='none'; }
+  }
+  function renderArchiveList(){
+    const list = $('archiveList');
+    const q = ($('archiveSearch').value||'').toLowerCase().trim();
+    const fromDate = $('archiveDateFrom').value || '';
+    const toDate = $('archiveDateTo').value || '';
+    const records = state.archive.filter(r=>{
+      if(q){
+        const name = (r.client.name||'').toLowerCase();
+        const vat = (r.client.vat||'').toLowerCase();
+        if(!name.includes(q) && !vat.includes(q)) return false;
+      }
+      const rDate = r.date || '';
+      if(fromDate && (!rDate || rDate < fromDate)) return false;
+      if(toDate && (!rDate || rDate > toDate)) return false;
+      return true;
+    }).sort((a,b)=> (b.date||'').localeCompare(a.date||'') || (b.savedAt||'').localeCompare(a.savedAt||''));
+
+    if(state.archive.length===0){
+      list.innerHTML = `<div class="empty-note">${T('archiveEmpty')}</div>`;
+      return;
+    }
+    if(records.length===0){
+      list.innerHTML = `<div class="empty-note">${T('archiveNoMatch')}</div>`;
+      return;
+    }
+    const typeKeyOf = (type)=> type==='Invoice' ? 'docTypeInvoice' : type==='Order confirmation' ? 'docTypeOrder' : 'docTypeQuote';
+    list.innerHTML = records.map(r=>{
+      const sym = currencySymbols[r.currency]||'';
+      return `<div class="archive-row" data-id="${escapeAttr(r.id)}">
+        <span class="a-type">${escapeHtml(T(typeKeyOf(r.type)))}</span>
+        <span class="a-number">${escapeHtml(r.number)}</span>
+        <span class="a-client">${escapeHtml(r.client.name||'—')}${r.client.vat? '<span class="a-vat">'+escapeHtml(r.client.vat)+'</span>':''}</span>
+        <span class="a-date">${escapeHtml(r.date||'–')}</span>
+        <span class="a-total">${sym}${r.total.toFixed(2)}</span>
+        <button class="a-del" title="${T('btnDeleteRecord')}">✕</button>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.archive-row').forEach(row=>{
+      const id = row.dataset.id;
+      row.addEventListener('click', (e)=>{
+        if(e.target.closest('.a-del')) return;
+        showArchiveDetail(id);
+      });
+      row.querySelector('.a-del').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        if(confirm(T('confirmDeleteRecord'))) deleteArchiveRecord(id);
+      });
+    });
+  }
+  function showArchiveDetail(id){
+    const r = state.archive.find(x=> x.id===id);
+    if(!r) return;
+    const typeKeyOf = (type)=> type==='Invoice' ? 'docTypeInvoice' : type==='Order confirmation' ? 'docTypeOrder' : 'docTypeQuote';
+    const sym = currencySymbols[r.currency]||'';
+    const panel = $('archiveDetailPanel');
+    panel.dataset.openId = id;
+    $('archiveDetailTitle').textContent = `${T(typeKeyOf(r.type))} — ${r.number}`;
+    const rows = r.items.map(it=> `
+      <tr>
+        <td style="font-family:var(--mono);color:var(--brass-dark);">${escapeHtml(it.code)}</td>
+        <td>${escapeHtml(it.description)}</td>
+        <td class="num">${it.qty}${it.unit? ' '+escapeHtml(it.unit):''}</td>
+        <td class="num">${sym}${it.price.toFixed(2)}</td>
+        <td class="num">${(it.vat!=null? it.vat : 0)}%</td>
+        <td class="num">${sym}${(it.qty*it.price).toFixed(2)}</td>
+      </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--slate);padding:14px;">${T('docNoLines')}</td></tr>`;
+    const breakdown = r.breakdown || (r.vatRate!=null ? [{rate:r.vatRate, base:r.subtotal, vat:r.vatAmount}] : []);
+    $('archiveDetailBody').innerHTML = `
+      <div class="archive-meta">
+        <div><span>${T('docFrom')==='' ? '' : T('fieldCustomerName')}</span>${escapeHtml(r.client.name||'—')}${r.client.vat? ' · '+escapeHtml(r.client.vat):''}</div>
+        <div><span>${T('docDate')}</span>${escapeHtml(r.date||'–')}</div>
+        <div><span>${T('docValidUntil')}</span>${escapeHtml(r.valid||'–')}</div>
+        <div><span>${T('docCurrency')}</span>${escapeHtml(r.currency)}</div>
+        ${r.savedAt? `<div><span>${T('docSavedLabel')}</span>${escapeHtml(formatTimestamp(r.savedAt))}</div>` : ''}
+      </div>
+      <table>
+        <thead><tr><th style="width:13%;">${T('colCode')}</th><th>${T('colDescription')}</th><th class="num" style="width:10%;">${T('colQty')}</th><th class="num" style="width:13%;">${T('colUnitPrice')}</th><th class="num" style="width:9%;">${T('colVat')}</th><th class="num" style="width:13%;">${T('colLineTotal')}</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="archive-totals">
+        <div class="row"><span>${T('docSubtotal')}</span><span>${sym}${r.subtotal.toFixed(2)}</span></div>
+        ${breakdown.length===0
+          ? `<div class="row"><span>${T('docVat')(0)}</span><span>${sym}0.00</span></div>`
+          : breakdown.map(b=> `<div class="row"><span>${T('docVat')(b.rate)}</span><span>${sym}${b.vat.toFixed(2)}</span></div>`).join('')}
+        <div class="row grand"><span>${T('docTotal')}</span><span>${sym}${r.total.toFixed(2)}</span></div>
+      </div>
+    `;
+    panel.style.display = 'block';
+    if(typeof panel.scrollIntoView === 'function'){ panel.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+  }
+  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  /* ---------------- tabs ---------------- */
+  function switchTab(name){
+    document.querySelectorAll('.tab-btn').forEach(b=> b.classList.toggle('active', b.dataset.tab===name));
+    document.querySelectorAll('.tab-panel').forEach(p=> p.classList.toggle('active', p.dataset.panel===name));
+    $('appShell').classList.toggle('show-preview', name==='preview');
+    if(name==='preview'){ renderDocument(); }
+  }
+
+  /* ---------------- language ---------------- */
+  function applyLanguage(lang, opts){
+    opts = opts || {};
+    const wasDefaultTerms = $('d-terms') && ( $('d-terms').value.trim()==='' || Object.keys(TRANSLATIONS).some(l=> $('d-terms').value.trim()===TRANSLATIONS[l].defaultTerms.trim()) );
+    currentLang = TRANSLATIONS[lang] ? lang : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const key = el.getAttribute('data-i18n');
+      const val = T(key);
+      if(typeof val === 'string'){ el.textContent = val; }
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+      const key = el.getAttribute('data-i18n-ph');
+      const val = T(key);
+      if(typeof val === 'string'){ el.setAttribute('placeholder', val); }
+    });
+    if($('langSelect').value !== currentLang) $('langSelect').value = currentLang;
+    if(wasDefaultTerms && !opts.skipTermsUpdate){ $('d-terms').value = T('defaultTerms'); state.doc.terms = T('defaultTerms'); }
+    if(state.headers && state.headers.length && $('mappingArea').innerHTML.trim()!==''){ renderMapping(); }
+    renderCatalogStatus();
+    renderCatalogList();
+    renderItems();
+    renderTotals();
+    renderArchiveList();
+    if($('archiveDetailPanel').style.display==='block' && $('archiveDetailPanel').dataset.openId){ showArchiveDetail($('archiveDetailPanel').dataset.openId); }
+  }
+  async function saveLanguage(){
+    try{ await window.storage.set('ui-language', currentLang); }catch(e){}
+  }
+
+  /* ---------------- wire up events ---------------- */
+  document.querySelectorAll('.tab-btn').forEach(b=> b.addEventListener('click', ()=> switchTab(b.dataset.tab)));
+  document.querySelectorAll('[data-tab-jump]').forEach(b=> b.addEventListener('click', ()=> switchTab(b.dataset.tabJump)));
+
+  $('langSelect').addEventListener('change', ()=>{ applyLanguage($('langSelect').value); saveLanguage(); });
+
+  $('saveCompanyBtn').addEventListener('click', ()=>{
+    saveCompany();
+    const orig = T('btnSaveCompany');
+    $('saveCompanyBtn').textContent = T('btnSaved');
+    setTimeout(()=> $('saveCompanyBtn').textContent = T('btnSaveCompany'), 1400);
+  });
+  $('uploadBtn').addEventListener('click', ()=> $('csvInput').click());
+  $('csvInput').addEventListener('change', (e)=>{ if(e.target.files[0]) handleFile(e.target.files[0]); });
+  $('clearCatalogBtn').addEventListener('click', ()=>{
+    if(!confirm(T('confirmClearCatalog'))) return;
+    state.catalog=[]; state.headers=[]; state.rawRows=[]; state.catalogFileName='';
+    saveCatalog(); renderCatalogStatus(); renderCatalogList();
+  });
+  $('sampleCsvBtn').addEventListener('click', ()=>{
+    const sample = 'code,description,price,unit,vat\nSKU-001,Consulting hour,85.00,hr,21\nSKU-002,Standard installation kit,149.50,pc,21\nSKU-003,Annual maintenance plan,320.00,yr,6\n';
+    const blob = new Blob([sample], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='sample-catalog.csv'; a.click();
+    URL.revokeObjectURL(url);
+  });
+  $('catalogSearch').addEventListener('input', renderCatalogList);
+  $('d-currency').addEventListener('change', ()=>{ state.doc.currency=$('d-currency').value; renderCatalogList(); renderItems(); });
+  $('d-vat').addEventListener('input', renderTotals);
+  $('d-type').addEventListener('change', ()=>{ if(!$('d-number').value.trim()){ /* leave, generated at preview */ } });
+
+  $('goPreviewBtn').addEventListener('click', ()=> switchTab('preview'));
+  $('addBlankLineBtn').addEventListener('click', addBlankItem);
+  $('printBtn').addEventListener('click', ()=>{ renderDocument(); saveToArchive(); window.print(); });
+
+  /* Use the document number as the suggested filename when saving as PDF.
+     beforeprint/afterprint fire for both the button above and native
+     Ctrl+P / browser print menu, so this covers either trigger. */
+  const APP_TITLE = document.title;
+  window.addEventListener('beforeprint', ()=>{
+    document.title = state.doc.number ? state.doc.number : APP_TITLE;
+  });
+  window.addEventListener('afterprint', ()=>{
+    document.title = APP_TITLE;
+  });
+  $('saveArchiveBtn').addEventListener('click', async ()=>{
+    renderDocument();
+    await saveToArchive();
+    const orig = T('btnSaveArchive');
+    $('saveArchiveBtn').textContent = T('btnSaved');
+    setTimeout(()=> $('saveArchiveBtn').textContent = T('btnSaveArchive'), 1400);
+  });
+  $('archiveSearch').addEventListener('input', renderArchiveList);
+  $('archiveDateFrom').addEventListener('change', renderArchiveList);
+  $('archiveDateTo').addEventListener('change', renderArchiveList);
+  $('archiveClearFiltersBtn').addEventListener('click', ()=>{
+    $('archiveSearch').value=''; $('archiveDateFrom').value=''; $('archiveDateTo').value='';
+    renderArchiveList();
+  });
+  $('archiveCloseBtn').addEventListener('click', ()=>{ $('archiveDetailPanel').style.display='none'; });
+  $('resetQuoteBtn').addEventListener('click', ()=>{
+    if(!confirm(T('confirmReset'))) return;
+    state.items=[]; state.client={name:'',vat:'',addr1:'',city:'',country:'',email:''};
+    ['k-name','k-vat','k-addr1','k-city','k-country','k-email','d-number'].forEach(id=> $(id).value='');
+    $('d-date').value = todayISO(); $('d-valid').value='';
+    $('d-terms').value = T('defaultTerms');
+    state.doc.terms = T('defaultTerms');
+    state.doc.savedAt = null;
+    renderItems();
+  });
+
+  $('d-date').value = todayISO();
+
+  async function init(){
+    let savedLang = 'en';
+    try{
+      const l = await window.storage.get('ui-language');
+      if(l && l.value && TRANSLATIONS[l.value]) savedLang = l.value;
+    }catch(e){}
+    applyLanguage(savedLang, {skipTermsUpdate:true});
+    $('d-terms').value = T('defaultTerms');
+    state.doc.terms = T('defaultTerms');
+    await loadAll();
+    renderItems();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
